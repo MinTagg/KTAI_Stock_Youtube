@@ -1,3 +1,5 @@
+# 04/11 수정본
+
 from selenium.webdriver.common.keys import Keys
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -32,6 +34,7 @@ def delete_banner():
     
 def give_url(url):
     if len(url) < 5:
+        print('url 주소가 너무 짧습니다.')
         return
     delete_banner()
     elem = driver.find_element(By.CSS_SELECTOR, 'body > div > div.App.video.isSidebarFolded > div.mainWrapper > div.infoConverter > div.infoConverterBody > div.digestSection > div.inputSection > div.sourceInputWrapper > div.sourceInput.video > div.inputs > input')
@@ -46,8 +49,13 @@ def get_summary_script(file_name): #사이드바 접음
         out_file = os.path.join(config.FOLDER_NAME, file_name + '.txt')
         f = open(out_file, "w+")
         time.sleep(2)
-        driver.find_element(By.CSS_SELECTOR, 'body > div > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(2) > div:nth-child(1) > div:nth-child(3)').click()
         head_selector = 'body > div > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(3) > div '
+        try:
+            check = head_selector + ' > div:nth-child(3)' + ' > div > div > div.chunksumContents'
+            driver.find_element(By.CSS_SELECTOR, check)
+        except:
+            driver.find_element(By.CSS_SELECTOR, 'body > div > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(2) > div:nth-child(1) > div:nth-child(3)').click()  
+        time.sleep(1)
         idx = 3
         chk = driver.find_element(By.CSS_SELECTOR, head_selector)
         while True:
@@ -150,15 +158,21 @@ def search(search_key):
     time.sleep(2)
 
 def save_urls(save_num = 10):
+    
     time.sleep(1)
     f = open('youtube_urls.txt', 'w+')
-
+    body = driver.find_element(By.CSS_SELECTOR, 'body')
+    for _ in range(50):
+        body.send_keys(Keys.PAGE_DOWN)
+    time.sleep(1)
+    
     primary = driver.find_element(By.CSS_SELECTOR, 'body > ytd-app > div.style-scope.ytd-app > ytd-page-manager > ytd-search > div:nth-child(1) > ytd-two-column-search-results-renderer > div')
     content = primary.find_element(By.CSS_SELECTOR, 'ytd-section-list-renderer > div:nth-child(2)')
     cnt = 0
     set_idx = 1
-    while True:
-        try:
+    flag = 0
+    while True: 
+        try: 
             video_set = content.find_element(By.CSS_SELECTOR, 'ytd-item-section-renderer:nth-child({})'.format(set_idx) + ' > div:nth-child(3)')
             video_idx = 1
             while True:
@@ -166,22 +180,25 @@ def save_urls(save_num = 10):
                     video = video_set.find_element(By.CSS_SELECTOR, 'ytd-video-renderer:nth-child({})'.format(video_idx))
                     url_info = video.find_element(By.CSS_SELECTOR, 'div:nth-child(1) > ytd-thumbnail > a')
                     url = url_info.get_attribute('href')
-                    #print(url)
+                    #print(url, set_idx, video_idx)
                     f.write(url+'\n')
+                    flag = 0
                     cnt += 1
-                    video_idx+=1
-                    if cnt == save_num:
-                        print("{}개의 동영상 url 저장 완료.".format(cnt))
-                        return
-                except:
-                    break
-            set_idx+=1
-            body = driver.find_element(By.CSS_SELECTOR, 'body')
-            for _ in range(30):
-                body.send_keys(Keys.PAGE_DOWN)
-            time.sleep(1)
+                    video_idx += 1
+                except Exception as ex:
+                    #print(ex)
+                    if flag == 0:
+                        video_idx+=1
+                        flag = 1
+                    elif flag == 1:
+                        set_idx += 1
+                        flag = 0
+                        break
+                if cnt == save_num:
+                    print("{}개의 동영상 url 저장 완료.".format(cnt))
+                    return
         except:
-            print("영상 url 저장 실패. {}개의 url 저장했습니다. 영상이 {}개 만큼 없을 수 있습니다.".format(cnt, save_num))
+            print("영상 url 저장 실패. {}개의 url 저장했습니다. 영상이 {}개 만큼 없을 수 있습니다. 혹은 코드 수정을 통해 스크롤을 더 내려야합니다.".format(cnt, save_num))
             break
 
 def get_summary_with_urls():
@@ -204,5 +221,5 @@ def get_summary_with_query(query, video_nums):
         get_summary_script(str(idx+1))   
         
 if __name__ == "__main__":
-    ('apple stock', 5)
+    get_summary_with_query('apple stock', 5)
     #get_summary_with_urls()
