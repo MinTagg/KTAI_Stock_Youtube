@@ -12,22 +12,26 @@ def get_topics():
         index = contents.find('완벽한 영상요약, 릴리스에이아이') # 뒤쪽 릴리스 광고 삭제
         contents = contents[:index].replace('   ', '').split('\n\n')[:-1] # 뒤쪽 릴리스 광고 삭제 + 의미없는 띄어쓰기 삭제 + 문단별로 나눠서 리스트로 저장
         # filter 함수를 통해 관련있는 문단만 추출
+        # TODO: debugging_history 출력 방법 추가하기 -> log에 저장하거나, 따로 파일로 저장하기
         if FILTER_DEBUGGING:
             contents, debugging_history = filter(contents, debug = FILTER_DEBUGGING)
         else:
             contents = filter(contents, debug = FILTER_DEBUGGING)
         # gpt_call 함수를 통해 문단을 카테고리로 분류
         response = gpt_call(contents, SYSTEM_SCRIPT)
+        # 파일 저장을 위한 폴더 생성
+        make_folder()
         
-        if not os.path.exists(f'{FOLDER_NAME}_category'):
-            os.mkdir(f'{FOLDER_NAME}_category')
-        if not os.path.exists(f'{FOLDER_NAME}_category/original'):
-            os.mkdir(f'{FOLDER_NAME}_category/original')
-        
-        with open(f'{FOLDER_NAME}_category/original/{file_path.split("/")[-1]}', 'w', encoding='utf-8') as f:
+        with open(f'{FOLDER_NAME}_category/original/{file_path.split("/")[-1]}', 'w', encoding='utf-8') as f: # txt파일 저장
             f.write(response)
-        with open(f'{FOLDER_NAME}_category/{file_path.split("/")[-1].split(".")[0]}.pkl', 'wb') as f:
+        with open(f'{FOLDER_NAME}_category/{file_path.split("/")[-1].split(".")[0]}.pkl', 'wb') as f: # pkl파일 저장
             pkl.dump([x.split('/')[0] for x in response.split('\n')], f)
+
+def make_folder():
+    if not os.path.exists(f'{FOLDER_NAME}_category'):
+        os.mkdir(f'{FOLDER_NAME}_category')
+    if not os.path.exists(f'{FOLDER_NAME}_category/original'):
+        os.mkdir(f'{FOLDER_NAME}_category/original')
 
 def get_data_files(folder_name):
     data_files = []
