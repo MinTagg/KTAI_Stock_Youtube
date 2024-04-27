@@ -2,15 +2,21 @@ import os
 import pickle as pkl
 from openai import OpenAI
 from config import *
+from tqdm import tqdm
 
 def get_topics():
     file_paths = get_data_files(FOLDER_NAME)
 
-    for file_path in file_paths:
+    for i, file_path in enumerate(file_paths):
+        print(f"{i+1} start :: {file_path}")
         with open(file_path, 'r', encoding='utf-8') as f:
             contents = f.read()
         index = contents.find('완벽한 영상요약, 릴리스에이아이') # 뒤쪽 릴리스 광고 삭제
-        contents = contents[:index].replace('   ', '').split('\n\n')[:-1] # 뒤쪽 릴리스 광고 삭제 + 의미없는 띄어쓰기 삭제 + 문단별로 나눠서 리스트로 저장
+        contents = contents[:index].replace('   ', '').split('\n\n') # 뒤쪽 릴리스 광고 삭제 + 의미없는 띄어쓰기 삭제 + 문단별로 나눠서 리스트로 저장
+        if len(contents) == 1: # 문단이 하나인 경우, 문장별로 나눠서 리스트로 저장
+            pass
+        else:
+            contents = contents[:-1]
         # filter 함수를 통해 관련있는 문단만 추출
         # TODO: debugging_history 출력 방법 추가하기 -> log에 저장하거나, 따로 파일로 저장하기
         if FILTER_DEBUGGING:
@@ -64,7 +70,8 @@ def filter(contents, debug = False):
     temp_context = contents[0] # 첫번째 제목을 context로 설정
     if debug:
         debugging_history = ''
-    for i in range(1, len(contents)): # 한 문단씩 읽어가면서 context와 주제를 바탕으로 관련있는지 확인
+    for i in tqdm(range(1, len(contents))):
+    #for i in range(1, len(contents)): # 한 문단씩 읽어가면서 context와 주제를 바탕으로 관련있는지 확인
         gpt_input = f"<Main topic>: {SEARCH_NAME}\n<Context>: {temp_context}\n<Target>: {contents[i]}"
         response = gpt_call(contents= gpt_input, system_script= FILTER_PROMPT)
         if 'True' in response: # 관련이 있는 경우 context에 추가
