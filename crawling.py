@@ -1,4 +1,4 @@
-# 04/11 수정본
+# 04/23 수정본
 
 from selenium.webdriver.common.keys import Keys
 from selenium import webdriver
@@ -49,15 +49,15 @@ def get_summary_script(file_name): #사이드바 접음
         out_file = os.path.join(config.FOLDER_NAME, file_name + '.txt')
         f = open(out_file, "w+")
         time.sleep(2)
-        head_selector = 'body > div > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(3) > div '
+        check_head_selector = 'body > div > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4)'
         try:
-            check = head_selector + ' > div:nth-child(3)' + ' > div > div > div.chunksumContents'
+            check = check_head_selector + ' > div:nth-child(1)' + ' > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div.chunksum > div.contentSection > div.chunksumContents'
             driver.find_element(By.CSS_SELECTOR, check)
-        except:
+        except: 
             driver.find_element(By.CSS_SELECTOR, 'body > div > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(2) > div:nth-child(1) > div:nth-child(3)').click()  
         time.sleep(1)
-        idx = 3
-        chk = driver.find_element(By.CSS_SELECTOR, head_selector)
+        idx = 2
+        head_selector = 'body > div > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div:nth-child(4) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)'
         while True:
             try:
                 selector = head_selector + ' > div:nth-child({})'.format(idx)
