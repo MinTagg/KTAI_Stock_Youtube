@@ -1,4 +1,4 @@
-# 04/23 수정본
+# 05/08 수정본
 
 from selenium.webdriver.common.keys import Keys
 from selenium import webdriver
@@ -28,10 +28,15 @@ def delete_banner():
     try:
         time.sleep(1)
         driver.find_element(By.CSS_SELECTOR, 'body > div > div.topBanner.promotion > div.topBannerClosebutton').click()
-        print('banner 지움')
+        #print('banner 지움')
     except:
         pass
-    
+    try:
+        time.sleep(1)
+        driver.find_element(By.CSS_SELECTOR, 'body > div > div:nth-child(1) > div.topBannerClosebutton').click()
+        #print('banner 지움2')
+    except:
+        pass
 def give_url(url):
     if len(url) < 5:
         print('url 주소가 너무 짧습니다.')
@@ -221,5 +226,5 @@ def get_summary_with_query(query, video_nums):
         get_summary_script(str(idx+1))   
         
 if __name__ == "__main__":
-    get_summary_with_query('apple stock', 5)
+    get_summary_with_query('apple stock', 1)
     #get_summary_with_urls()
