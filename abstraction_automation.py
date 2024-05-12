@@ -19,11 +19,17 @@ def get_topics():
             contents = contents[:-1]
         # filter 함수를 통해 관련있는 문단만 추출
         # TODO: debugging_history 출력 방법 추가하기 -> log에 저장하거나, 따로 파일로 저장하기
-        if FILTER_DEBUGGING:
-            contents, debugging_history = filter(contents, debug = FILTER_DEBUGGING)
-        else:
-            contents = filter(contents, debug = FILTER_DEBUGGING)
+        #if FILTER_DEBUGGING:
+        #    contents, debugging_history = filter(contents, debug = FILTER_DEBUGGING)
+        #else:
+        #    contents = filter(contents, debug = FILTER_DEBUGGING)
         # gpt_call 함수를 통해 문단을 카테고리로 분류
+        
+        ## without filter
+        # gather all contents(list)
+
+        contents = '\n'.join(contents)
+
         response = gpt_call(contents, SYSTEM_SCRIPT)
         # 파일 저장을 위한 폴더 생성
         make_folder()
