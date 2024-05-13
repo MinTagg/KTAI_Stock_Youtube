@@ -44,11 +44,11 @@ def path2embedding(path, country_code, dataframe=None):
             
     return dataframe
 
-def get_embedding(company_name, country = {'kor':0, 'us':1}):
+def get_embedding(base_path, company_name, country = {'kor':0, 'us':1}):
     dataframe = pd.DataFrame(columns = ['country', 'topic', 'time_weight', 'num', 'New topic name from GPT', 'path', 'embeddings'])
     for i in range(len(country)):
         print(f'{list(country.keys())[i]} start')
-        dataframe = path2embedding(f'DATA/{company_name}/time_data_{company_name}_{list(country.keys())[i]}_category/', list(country.values())[i], dataframe)
+        dataframe = path2embedding(f'{base_path}{company_name}/time_data_{company_name}_{list(country.keys())[i]}_category/', list(country.values())[i], dataframe)
     return dataframe
 
 """
@@ -99,7 +99,7 @@ def clustering(dataframe):
         dataframe.loc[dataframe['num'] == i, 'New topic name from GPT'] = new_topic
     return dataframe
 
-def embedding(company_name):
-    dataframe = get_embedding(company_name)
+def embedding(base_path, company_name):
+    dataframe = get_embedding(base_path, company_name)
     dataframe = clustering(dataframe)
-    dataframe.to_csv(f'DATA/{company_name}.csv', index=False)
+    dataframe.to_csv(f'{base_path}{company_name}.csv', index=False)
