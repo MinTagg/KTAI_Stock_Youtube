@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import os
 
-def saving(x, y, type_of_graph, company_name): # saving(x,y, 'mentioned_video', path)
+def saving(x, y, type_of_graph, company_name, base_path):
     plt.bar(x, y[0], color='palevioletred', label='KOR')
     # mulpiply -1 to y[1] to show negative value
     plt.bar(x, y[1]*-1, color='steelblue', label='US')
@@ -14,11 +14,11 @@ def saving(x, y, type_of_graph, company_name): # saving(x,y, 'mentioned_video', 
 
     # try to make Visualization/{company_name} folder
     try:
-        os.makedirs(f'Visualization/{company_name}')
+        os.makedirs(f'{base_path}/Visualization/{company_name}')
     except:
         pass
 
-    plt.savefig(f'Visualization/{company_name}/{type_of_graph}.png')
+    plt.savefig(f'{base_path}Visualization/{company_name}/{type_of_graph}.png')
     plt.close()
 
 def mentioned_video(dataframe):
@@ -66,8 +66,8 @@ def visualizer(base_path):
         company_name = path.split('/')[-1].split('.')[0]
         df = pd.read_csv(path)
         x,y = mentioned_video(df)
-        saving(x,y, 'mentioned_video', company_name)
+        saving(x,y, 'mentioned_video', company_name, base_path)
         x,y = mentioned_topic(df)
-        saving(x,y, 'mentioned_topic', company_name)
+        saving(x,y, 'mentioned_topic', company_name, base_path)
         x,y = mentioned_time(df)
-        saving(x,y, 'mentioned_time', company_name)
+        saving(x,y, 'mentioned_time', company_name, base_path)
