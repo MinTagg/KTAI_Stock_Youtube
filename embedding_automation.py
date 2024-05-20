@@ -6,6 +6,7 @@ import pandas as pd
 from sklearn.cluster import AffinityPropagation
 import numpy as np
 from abstraction_automation import gpt_call
+import pickle as pkl
 
 def gpt_embedding_call(contents, gpt = 'text-embedding-3-large'):
     """
@@ -22,12 +23,29 @@ def gpt_embedding_call(contents, gpt = 'text-embedding-3-large'):
 
     return temp
 
+def path2emmbedding_without_time(path, country_code, dataframe=None):
+    if dataframe is None:
+        dataframe = pd.DataFrame(columns = ['country', 'topic', 'time_weight', 'num', 'New topic name from GPT', 'path', 'embeddings'])
+    
+    # list of pkl files in path
+    pkl_list = os.listdir(path)
+    pkl_list = [i for i in pkl_list if i.endswith('.pkl')]
+    for pkl_name in tqdm(pkl_list):
+        with open(path + pkl_name, 'rb') as f:
+            contents = pkl.load(f)
+        embeddings = gpt_embedding_call(contents)
+        for i in range(len(embeddings)):
+            dataframe = pd.concat([dataframe, pd.DataFrame([[country_code, contents[i], None, None, None, path + pkl_name, embeddings[i]]], columns = dataframe.columns)], ignore_index=True)
+    return dataframe
+    
+
 def path2embedding(path, country_code, dataframe=None):
     """
     path: path to the txt file
     """
     if dataframe is None:
         dataframe = pd.DataFrame(columns = ['country', 'topic', 'time_weight', 'num', 'New topic name from GPT', 'path', 'embeddings'])
+    # get the list of txt files
     for txt in tqdm(os.listdir(path)):
         time_list = []
         topic_list = []
@@ -48,7 +66,7 @@ def get_embedding(base_path, company_name, country = {'kor':0, 'us':1}):
     dataframe = pd.DataFrame(columns = ['country', 'topic', 'time_weight', 'num', 'New topic name from GPT', 'path', 'embeddings'])
     for i in range(len(country)):
         print(f'{list(country.keys())[i]} start')
-        dataframe = path2embedding(f'{base_path}{company_name}/time_data_{company_name}_{list(country.keys())[i]}_category/', list(country.values())[i], dataframe)
+        dataframe = path2embedding(f'{base_path}data_{company_name}_{list(country.keys())[i]}_category/', list(country.values())[i], dataframe)
     return dataframe
 
 """
@@ -94,7 +112,7 @@ def clustering(dataframe):
     for i in range(max_num+1):
         temp = dataframe[dataframe['num'] == i]
         temp = temp['topic'].tolist()
-        temp = ' '.join(temp)
+        temp = ', '.join(temp)
         new_topic = gpt_call(temp, NEWTOPIC_PROMPT)
         dataframe.loc[dataframe['num'] == i, 'New topic name from GPT'] = new_topic
     return dataframe
@@ -102,4 +120,8 @@ def clustering(dataframe):
 def embedding(base_path, company_name):
     dataframe = get_embedding(base_path, company_name)
     dataframe = clustering(dataframe)
-    dataframe.to_csv(f'{base_path}{company_name}.csv', index=False)
+
+    # for without visualization - delete 'embeddings' column
+    #dataframe = dataframe.drop('embeddings', axis=1)
+    
+    dataframe.to_csv(f'{base_path[:-1]}.csv', index=False)
