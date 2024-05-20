@@ -31,6 +31,7 @@ def get_topics():
         contents = '\n'.join(contents)
 
         response = gpt_call(contents, SYSTEM_SCRIPT)
+        response = response.replace('\n\n', '\n')
         # 파일 저장을 위한 폴더 생성
         make_folder()
         
@@ -87,3 +88,6 @@ def filter(contents, debug = False):
     if debug:
         return temp_context, debugging_history
     return temp_context
+
+if __name__ == '__main__':
+    get_topics()
